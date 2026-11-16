@@ -9,7 +9,7 @@ class Config:
     """Base configuration."""
     
     # Flask
-    SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
+    SECRET_KEY = os.environ.get('SECRET_KEY') or os.urandom(32)
     DEBUG = False
     TESTING = False
     
@@ -28,7 +28,7 @@ class Config:
     PERMANENT_SESSION_LIFETIME = timedelta(days=7)
     
     # JWT
-    JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY', 'jwt-secret-key-change-in-production')
+    JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY') or os.urandom(32)
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=24)
     JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=30)
     
@@ -51,6 +51,8 @@ class DevelopmentConfig(Config):
 
 
 class ProductionConfig(Config):
+    if not os.environ.get('SECRET_KEY') or not os.environ.get('JWT_SECRET_KEY'):
+        raise RuntimeError('SECRET_KEY and JWT_SECRET_KEY must be configured in production')
     """Production configuration."""
     DEBUG = False
     SQLALCHEMY_ECHO = False
